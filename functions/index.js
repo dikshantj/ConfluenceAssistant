@@ -1,12 +1,16 @@
 const functions = require('firebase-functions')
 const rp = require('request-promise')
-const timestamp = require('unix-timestamp')
+
 const {
   dialogflow,
-  Suggestions
+  Suggestions,
+  Carousel
 } = require('actions-on-google')
 
+const base_url = 'https://confluence-backend.appspot.com/api/';
+
 const ABOUT_CONFLU = 'About Confluence'
+const CATEGORY_LIST = 'Category list'
 
 
 
@@ -33,6 +37,35 @@ app.intent(ABOUT_CONFLU, conv => {
     It witnesses an active participation from over 30 NITs, IITs, and other institutes of repute across the nation every year.
     It has always been graced by the presence of several renowned personalities.</speak>`)
   conv.ask(`Ask anything ..... m listening to you.`)
-  conv.ask(new Suggestions(['Event Categories','About Confluence', 'Team Confluence','Developers','Sponsors']))
+  conv.ask(new Suggestions(['Event Categories', 'Team Confluence','Developers','Sponsors']))
+})
+
+app.intent(CATEGORY_LIST, conv=>{
+  return rp(base_url + 'category/')
+    .then((response) => {
+      var res = JSON.parse(response);
+      var categories = [];
+      for(let i=0; i< res.data.length; i++){
+        categories.push(res.data[i].name);
+      }
+      let list = {};
+      for(let i in categories){
+        list[categories[i]] = {
+          title: categories[i],
+          description: categories[i] + 'events'
+        }
+      }
+      conv.ask(`<speak>Here are the different categories of evente</speak>`)
+      conv.ask(new Carousel({
+        title: 'List of Categories',
+        items: list
+      }))
+      conv.ask(new Suggestions(['Event Categories','About Confluence', 'Team Confluence','Developers','Sponsors']))
+      
+    })
+    .catch(err => {
+      conv.ask("Sorry, you can ask something else. Ask anything ..... m listening to you.")
+      conv.ask(new Suggestions(['Event Categories','About Confluence', 'Team Confluence','Developers','Sponsors']))
+    })
 })
 
