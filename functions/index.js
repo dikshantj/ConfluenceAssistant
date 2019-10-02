@@ -10,7 +10,9 @@ const {
 const base_url = 'https://confluence-backend.appspot.com/api/';
 
 const ABOUT_CONFLU = 'About Confluence'
-const CATEGORY_LIST = 'Category list'
+const CATEGORY_LIST = 'categoryList'
+const DEVELOPERS = 'Developers'
+const SPONSORS = 'Sponsors'
 
 
 
@@ -40,33 +42,42 @@ app.intent(ABOUT_CONFLU, conv => {
   conv.ask(new Suggestions(['Event Categories', 'Team Confluence','Developers','Sponsors']))
 })
 
-app.intent(CATEGORY_LIST, conv=>{
-  return rp(base_url + 'category/')
-    .then((response) => {
-      var res = JSON.parse(response);
-      var categories = [];
-      for(let i=0; i< res.data.length; i++){
-        categories.push(res.data[i].name);
-      }
-      let list = {};
-      for(let i in categories){
-        list[categories[i]] = {
-          title: categories[i],
-          description: categories[i] + 'e}vents'
-        }
-      }
-      conv.ask(`<speak>Here are the different categories of evente</speak>`)
-      conv.ask(new Carousel({
-        title: 'List of Categories',
-        items: list
-      }))
-      conv.ask(new Suggestions(['Event Categories','About Confluence', 'Team Confluence','Developers','Sponsors']))
-      
-    })
-    .catch(err => {
-      conv.ask("Sorry, you can ask something else. Ask anything ..... m listening to you.")
-      conv.ask(new Suggestions(['Event Categories','About Confluence', 'Team Confluence','Developers','Sponsors']))
-    })
+app.intent(CATEGORY_LIST, async conv=>{
+  try {
+    const response = await rp(`${base_url}category/`);
+    var res = JSON.parse(response);
+    var categories = [];
+    for (let i in res.data) {
+      categories.push(res.data[i].name);
+    }
+    conv.ask(JSON.stringify(categories));
+    let list = {};
+    for (let j = 0; j < categories.length; j++) {
+      list[categories[j]] = {
+        title: categories[j],
+        description: categories[j] + ' events'
+      };
+    }
+    conv.ask(`Here are the different categories of events`);
+    conv.ask(new Carousel({
+      title: 'List of Categories',
+      items: list
+    }));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+  catch (err) {
+    conv.ask(JSON.stringify(err));
+    conv.ask("Sorry, you can ask something else. Ask anything ..... m listening to you.");
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+});
+
+app.intent(DEVELOPERS, conv =>{
+    conv.ask('Yet to be updated')
+})
+
+app.intent(SPONSORS, conv =>{
+    conv.ask('Yet to be updated')
 })
 
 exports.confluence = functions.https.onRequest(app)
