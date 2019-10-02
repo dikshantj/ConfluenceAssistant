@@ -26,7 +26,7 @@ app.intent('Default Welcome Intent', conv=>{
   `Welcome to Confluence'19 Remastered. Here you can ask any queries related to fest like Categories of Events` +
   `, Events of a particular category, any detail of an event, <sub alias="etcetra">etc</sub>`+
   `Say bye any time to end the conversation. </speak>`)
-  conv.ask(`speak>Ask something I'm listening!` )
+  conv.ask(`<speak>Ask something I'm listening!</speak>` )
   conv.ask(new Suggestions(['Event Categories','About Confluence', 'Team Confluence','Developers','Sponsors']))
 })
 
@@ -52,7 +52,7 @@ app.intent(CATEGORY_LIST, conv=>{
       for(let i in categories){
         list[categories[i]] = {
           title: categories[i],
-          description: categories[i] + 'events'
+          description: categories[i] + 'e}vents'
         }
       }
       conv.ask(`<speak>Here are the different categories of evente</speak>`)
@@ -69,3 +69,4 @@ app.intent(CATEGORY_LIST, conv=>{
     })
 })
 
+exports.confluence = functions.https.onRequest(app)
