@@ -4,13 +4,17 @@ const rp = require('request-promise')
 const {
   dialogflow,
   Suggestions,
-  Carousel
+  List,
+  BasicCard,
+  Image
 } = require('actions-on-google')
 
 const base_url = 'https://confluence-backend.appspot.com/api/';
 
 const ABOUT_CONFLU = 'About Confluence'
 const CATEGORY_LIST = 'categoryList'
+const EVENT_LIST = 'categoryList - events'
+const EVENT_DETAIL = 'categoryList - events - detailz'
 const DEVELOPERS = 'Developers'
 const SPONSORS = 'Sponsors'
 
@@ -50,7 +54,6 @@ app.intent(CATEGORY_LIST, async conv=>{
     for (let i in res.data) {
       categories.push(res.data[i].name);
     }
-    conv.ask(JSON.stringify(categories));
     let list = {};
     for (let j = 0; j < categories.length; j++) {
       list[categories[j]] = {
@@ -59,18 +62,46 @@ app.intent(CATEGORY_LIST, async conv=>{
       };
     }
     conv.ask(`Here are the different categories of events`);
-    conv.ask(new Carousel({
+    conv.ask(new List({
       title: 'List of Categories',
       items: list
     }));
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
-    conv.ask(JSON.stringify(err));
     conv.ask("Sorry, you can ask something else. Ask anything ..... m listening to you.");
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
 });
+
+
+
+app.intent(EVENT_LIST, async (conv, _params, category) => {
+  try {
+    const res = await rp(`${base_url}events/name/?category=${category}`);
+    let eventList = JSON.parse(res).data[0].events;
+    let list = {}
+
+    for (let i in eventList)
+      list[eventList[i].name] = {
+        title: eventList[i].name,
+        description: 'Tap for details'
+      }
+
+    conv.ask('Here are the different ' + category + ' Events')
+    conv.ask(new List({
+      title: 'List of ' + category + ' Events',
+      items: list
+    }))
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+  catch (err) {
+    conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+})
+
+
 
 app.intent(DEVELOPERS, conv =>{
     conv.ask('Yet to be updated')
