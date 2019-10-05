@@ -6,7 +6,8 @@ const {
   Suggestions,
   List,
   BasicCard,
-  Image
+  Image,
+  Carousel
 } = require('actions-on-google')
 
 const base_url = 'https://confluence-backend.appspot.com/api/';
@@ -14,7 +15,7 @@ const base_url = 'https://confluence-backend.appspot.com/api/';
 const ABOUT_CONFLU = 'About Confluence'
 const CATEGORY_LIST = 'categoryList'
 const EVENT_LIST = 'categoryList - events'
-const EVENT_DETAIL = 'categoryList - events - detailz'
+const EVENT_DETAIL = 'categoryList - events - detail'
 const DEVELOPERS = 'Developers'
 const SPONSORS = 'Sponsors'
 
@@ -101,14 +102,64 @@ app.intent(EVENT_LIST, async (conv, _params, category) => {
   }
 })
 
+app.intent(EVENT_DETAIL, async (conv,params, event) => {
+  try {
+    const res = await rp(`${base_url}events/desc/`);
+    let allData = JSON.parse(res).data;
+    for (let i in allData) {
+      for(let j in allData[i].events){
+        let name = allData[i].events[j].name;
+        if (name == event) {
+          conv.ask('Here are the details of ' + event);
+          conv.ask(new BasicCard({
+            text: allData[i].events[j].desc,
+            title: event,
+            image: new Image({
+              url: allData[i].events[j].imageUrl,
+              alt: allData[i].events[j].name,
+            }),
+            display: 'CROPPED'
+          }));
+        conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+        }
+      }
+    }
+  }
+  catch (err) {
+    conv.ask(err);
+    conv.ask('Sorry event name is not clear. Ask anything ..... m listening to you.');
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+})
 
 
 app.intent(DEVELOPERS, conv =>{
     conv.ask('Yet to be updated')
 })
 
-app.intent(SPONSORS, conv =>{
-    conv.ask('Yet to be updated')
+app.intent(SPONSORS, async conv =>{
+  try {
+    const res = await rp(`${base_url}sponsors/`);
+    let sponsors = JSON.parse(res).data;
+    let list = {};
+
+    for (let i in sponsors)
+      list[sponsors[i].name] = {
+        title: sponsors[i].name,
+        description: "Tap for details"
+      }
+
+    conv.ask('Here are the different categories of events')
+    conv.ask(new Carousel({
+      title: 'List of Sponsors',
+      items: list
+    }))
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers']));
+  }
+  catch (err) {
+    conv.ask('Sorry cannot fulfill your request. Ask anything ..... m listening to you.');
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers']));
+  }
 })
 
 exports.confluence = functions.https.onRequest(app)
