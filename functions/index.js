@@ -6,7 +6,6 @@ const {
   Suggestions,
   List,
   BasicCard,
-  Image,
   Carousel
 } = require('actions-on-google')
 
@@ -18,6 +17,8 @@ const EVENT_LIST = 'categoryList - events'
 const EVENT_DETAIL = 'categoryList - events - detail'
 const DEVELOPERS = 'Developers'
 const SPONSORS = 'Sponsors'
+const EVENTLIST = 'categoryEvents'
+const EVENTDETAILS = 'categoryEvents - detail'
 
 
 
@@ -77,7 +78,7 @@ app.intent(CATEGORY_LIST, async conv=>{
 
 
 
-app.intent(EVENT_LIST, async (conv, _params, category) => {
+app.intent(EVENT_LIST, async (conv, params, category) => {
   try {
     const res = await rp(`${base_url}events/name/?category=${category}`);
     let eventList = JSON.parse(res).data[0].events;
@@ -97,36 +98,55 @@ app.intent(EVENT_LIST, async (conv, _params, category) => {
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
-    conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
+    conv.ask(JSON.stringify(err));
+    //conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
 })
 
-app.intent(EVENT_DETAIL, async (conv,params, event) => {
+
+app.intent(EVENTLIST, async (conv,{categories}) => {
   try {
-    const res = await rp(`${base_url}events/desc/`);
-    let allData = JSON.parse(res).data;
-    for (let i in allData) {
-      for(let j in allData[i].events){
-        let name = allData[i].events[j].name;
-        if (name == event) {
-          conv.ask('Here are the details of ' + event);
-          conv.ask(new BasicCard({
-            text: allData[i].events[j].desc,
-            title: event,
-            image: new Image({
-              url: allData[i].events[j].imageUrl,
-              alt: allData[i].events[j].name,
-            }),
-            display: 'CROPPED'
-          }));
-        conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
-        }
+    conv.ask(categories);
+    const res = await rp(`${base_url}events/name/?category=${categories}`);
+    let eventList = JSON.parse(res).data[0].events;
+    let list = {}
+
+    for (let i in eventList)
+      list[eventList[i].name] = {
+        title: eventList[i].name,
+        description: 'Tap for details'
       }
-    }
+
+    conv.ask('Here are the different ' + categories + ' Events')
+    conv.ask(new List({
+      title: 'List of ' + categories+ ' Events',
+      items: list
+    }))
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
-    conv.ask(err);
+    conv.ask(JSON.stringify(err));
+    //conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+})
+
+app.intent(EVENT_DETAIL, async (conv, params, event) => {
+  try {
+    const res = await rp(`${base_url}events/desc/?event=${event}`);
+    let data = JSON.parse(res).data;
+    var cord = data.coordinators.toString();
+    let description = data.description +' \n  \n**VENUE: ' + data.venue +'**'+ '\n \n**COORDINATORS: '+cord+'**';
+    conv.ask('Here are the details of ' + event);
+    conv.ask(new BasicCard({
+      text: description,
+      title: data.name,
+      display: 'CROPPED'
+    }));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+  catch (err) {
     conv.ask('Sorry event name is not clear. Ask anything ..... m listening to you.');
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
