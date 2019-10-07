@@ -98,8 +98,7 @@ app.intent(EVENT_LIST, async (conv, params, category) => {
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
-    conv.ask(JSON.stringify(err));
-    //conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
+    conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
 })
@@ -107,7 +106,6 @@ app.intent(EVENT_LIST, async (conv, params, category) => {
 
 app.intent(EVENTLIST, async (conv,{categories}) => {
   try {
-    conv.ask(categories);
     const res = await rp(`${base_url}events/name/?category=${categories}`);
     let eventList = JSON.parse(res).data[0].events;
     let list = {}
@@ -126,8 +124,7 @@ app.intent(EVENTLIST, async (conv,{categories}) => {
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
-    conv.ask(JSON.stringify(err));
-    //conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
+    conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
 })
