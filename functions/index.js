@@ -6,12 +6,14 @@ const {
   Suggestions,
   List,
   BasicCard,
-  Carousel
+  BrowseCarousel,
+  Image
 } = require('actions-on-google')
 
 const base_url = 'https://confluence-backend.appspot.com/api/';
 
 const ABOUT_CONFLU = 'About Confluence'
+
 const CATEGORY_LIST = 'categoryList'
 const EVENT_LIST = 'categoryList - events'
 const EVENT_DETAIL = 'categoryList - events - detail'
@@ -20,12 +22,11 @@ const SPONSORS = 'Sponsors'
 const EVENTLIST = 'categoryEvents'
 const EVENTDETAIL = 'categoryEvents - detail'
 const EVENTS = 'events'
-
 const app = dialogflow({ debug: true });
 
 app.intent('Default Fallback Intent', conv =>{
   conv.ask("Please be more specific and try again!")
-  conv.ask(new Suggestions(['Event Categories','About Confluence', 'Team Confluence','Developers','Sponsors']))
+  conv.ask(new Suggestions(['Event Categories','About Confluence','Developers','Sponsors']))
 })
 
 app.intent('Default Welcome Intent', conv=>{
@@ -34,7 +35,7 @@ app.intent('Default Welcome Intent', conv=>{
   `, Events of a particular category, any detail of an event, <sub alias="etcetra">etc</sub>`+
   `Say bye any time to end the conversation. </speak>`)
   conv.ask(`<speak>Ask something I'm listening!</speak>` )
-  conv.ask(new Suggestions(['Event Categories','About Confluence', 'Team Confluence','Developers','Sponsors']))
+  conv.ask(new Suggestions(['Event Categories','About Confluence','Developers','Sponsors']))
 })
 
 app.intent(ABOUT_CONFLU, conv => {
@@ -44,7 +45,7 @@ app.intent(ABOUT_CONFLU, conv => {
     It witnesses an active participation from over 30 NITs, IITs, and other institutes of repute across the nation every year.
     It has always been graced by the presence of several renowned personalities.</speak>`)
   conv.ask(`Ask anything ..... m listening to you.`)
-  conv.ask(new Suggestions(['Event Categories', 'Team Confluence','Developers','Sponsors']))
+  conv.ask(new Suggestions(['Event Categories','Developers','Sponsors']))
 })
 
 app.intent('Exit Conversation', (conv) => {
@@ -71,11 +72,11 @@ app.intent(CATEGORY_LIST, async conv=>{
       title: 'List of Categories',
       items: list
     }));
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
     conv.ask("Sorry, you can ask something else. Ask anything ..... m listening to you.");
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
 });
 
@@ -96,11 +97,11 @@ app.intent(EVENT_LIST, async (conv, params, category) => {
       title: 'List of ' + category + ' Events',
       items: list
     }))
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
     conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
 })
 
@@ -121,11 +122,11 @@ app.intent(EVENTLIST, async (conv,{categories}) => {
       title: 'List of ' + categories+ ' Events',
       items: list
     }))
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
     conv.ask('Sorry, you can ask something else. Ask anything ..... m listening to you.');
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
 })
 
@@ -134,18 +135,18 @@ app.intent([EVENT_DETAIL,EVENTDETAIL], async (conv, params, event) => {
     const res = await rp(`${base_url}events/desc/?event=${event}`);
     let data = JSON.parse(res).data;
     var cord = data.coordinators.toString();
-    let description = data.description +' \n  \n**VENUE: ' + data.venue +'**'+ '\n \n**COORDINATORS: '+cord+'**';
+    let description = data.description +'  \n**VENUE: ' + data.venue +'**'+ '  \n**COORDINATORS: '+cord+'**';
     conv.ask('Here are the details of ' + event);
     conv.ask(new BasicCard({
       text: description,
       title: data.name,
       display: 'CROPPED'
     }));
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
     conv.ask('Sorry event name is not clear. Ask anything ..... m listening to you.');
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
 })
 
@@ -154,19 +155,19 @@ app.intent(EVENTS, async (conv, {event}) => {
     const res = await rp(`${base_url}events/desc/?event=${event}`);
     let data = JSON.parse(res).data;
     var cord = data.coordinators.toString();
-    let description = data.description +' \n  \n**VENUE: ' + data.venue +'**'+ '\n \n**COORDINATORS: '+cord+'**';
+    let description = data.description +'  \n**VENUE: ' + data.venue +'**'+ '  \n**COORDINATORS: '+cord+'**';
     conv.ask('Here are the details of ' + event);
     conv.ask(new BasicCard({
       text: description,
       title: data.name,
       display: 'CROPPED'
     }));
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
     conv.ask(JSON.stringify(err));
     //conv.ask('Sorry event name is not clear. Ask anything ..... m listening to you.');
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
 })
 
@@ -176,27 +177,55 @@ app.intent(DEVELOPERS, conv =>{
 
 app.intent(SPONSORS, async conv =>{
   try {
-    const res = await rp(`${base_url}sponsors/`);
-    let sponsors = JSON.parse(res).data;
+    let sponsors =[
+      {
+      "name": "Dikshant",
+      "sponsorSection": "sponsor section",
+      "targetUrl": "https://github.com/dikshantj",
+      "imageUrl": "https://avatars1.githubusercontent.com/u/29337284?s=460&v=4",
+      "tagline": "With business lies our trust"
+      },
+    {
+      "name": "Dikshant1",
+      "sponsorSection": "sponsor section",
+      "targetUrl": "https://github.com/dikshantj",
+      "imageUrl": "https://avatars1.githubusercontent.com/u/29337284?s=460&v=4",
+      "tagline": "with business lies our trust"
+      },
+      {
+      "name": "Dikshant2",
+      "sponsorSection": "sponsor section",
+      "targetUrl": "https://github.com/dikshantj",
+      "imageUrl": "https://avatars1.githubusercontent.com/u/29337284?s=460&v=4",
+      "tagline": "with business lies our trust"
+      }
+    ] 
     let list = {};
 
     for (let i in sponsors)
       list[sponsors[i].name] = {
-        title: sponsors[i].name,
-        description: "Tap for details"
+        title: sponsors[i].sponsorSection,
+        description: '**' + sponsors[i].name + '**  \n'+sponsors[i].tagline,
+        url: sponsors[i].targetUrl,
+        image: new Image({
+          url: sponsors[i].imageUrl,
+          alt: sponsors[i].name +' logo',
+        }),
       }
 
-    conv.ask('Here are the different categories of events')
-    conv.ask(new Carousel({
+    conv.ask('Here are the different sponsors')
+    conv.ask(new BrowseCarousel({
       title: 'List of Sponsors',
       items: list
     }))
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers']));
   }
   catch (err) {
     conv.ask('Sorry cannot fulfill your request. Ask anything ..... m listening to you.');
-    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers']));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers']));
   }
 })
+
+  
 
 exports.confluence = functions.https.onRequest(app)
