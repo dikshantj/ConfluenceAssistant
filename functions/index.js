@@ -18,7 +18,7 @@ const EVENT_DETAIL = 'categoryList - events - detail'
 const DEVELOPERS = 'Developers'
 const SPONSORS = 'Sponsors'
 const EVENTLIST = 'categoryEvents'
-const EVENTDETAILS = 'categoryEvents - detail'
+const EVENTDETAIL = 'categoryEvents - detail'
 
 
 
@@ -47,6 +47,11 @@ app.intent(ABOUT_CONFLU, conv => {
   conv.ask(`Ask anything ..... m listening to you.`)
   conv.ask(new Suggestions(['Event Categories', 'Team Confluence','Developers','Sponsors']))
 })
+
+app.intent('Exit Conversation', (conv) => {
+  conv.close(`Okay, talk to you next time!`);
+});
+
 
 app.intent(CATEGORY_LIST, async conv=>{
   try {
@@ -129,7 +134,7 @@ app.intent(EVENTLIST, async (conv,{categories}) => {
   }
 })
 
-app.intent(EVENT_DETAIL, async (conv, params, event) => {
+app.intent([EVENT_DETAIL,EVENTDETAIL], async (conv, params, event) => {
   try {
     const res = await rp(`${base_url}events/desc/?event=${event}`);
     let data = JSON.parse(res).data;
@@ -178,5 +183,6 @@ app.intent(SPONSORS, async conv =>{
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers']));
   }
 })
+
 
 exports.confluence = functions.https.onRequest(app)
