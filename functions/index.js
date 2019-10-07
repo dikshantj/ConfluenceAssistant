@@ -7,6 +7,7 @@ const {
   List,
   BasicCard,
   BrowseCarousel,
+  BrowseCarouselItem,
   Image
 } = require('actions-on-google')
 
@@ -165,8 +166,8 @@ app.intent(EVENTS, async (conv, {event}) => {
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
   catch (err) {
-    conv.ask(JSON.stringify(err));
-    //conv.ask('Sorry event name is not clear. Ask anything ..... m listening to you.');
+    // conv.ask(JSON.stringify(err));
+    conv.ask('Sorry event name is not clear. Ask anything ..... m listening to you.');
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers', 'Sponsors']));
   }
 })
@@ -177,24 +178,24 @@ app.intent(DEVELOPERS, conv =>{
 
 app.intent(SPONSORS, async conv =>{
   try {
-    let sponsors =[
+    var sponsors =[
       {
       "name": "Dikshant",
-      "sponsorSection": "sponsor section",
+      "sponsorSection": "sponsor section1",
       "targetUrl": "https://github.com/dikshantj",
       "imageUrl": "https://avatars1.githubusercontent.com/u/29337284?s=460&v=4",
       "tagline": "With business lies our trust"
       },
     {
       "name": "Dikshant1",
-      "sponsorSection": "sponsor section",
+      "sponsorSection": "sponsor section2",
       "targetUrl": "https://github.com/dikshantj",
       "imageUrl": "https://avatars1.githubusercontent.com/u/29337284?s=460&v=4",
       "tagline": "with business lies our trust"
       },
       {
       "name": "Dikshant2",
-      "sponsorSection": "sponsor section",
+      "sponsorSection": "sponsor section3",
       "targetUrl": "https://github.com/dikshantj",
       "imageUrl": "https://avatars1.githubusercontent.com/u/29337284?s=460&v=4",
       "tagline": "with business lies our trust"
@@ -213,9 +214,8 @@ app.intent(SPONSORS, async conv =>{
         }),
       }
 
-    conv.ask('Here are the different sponsors')
+    conv.ask('Here are the different sponsors' + JSON.stringify(list))
     conv.ask(new BrowseCarousel({
-      title: 'List of Sponsors',
       items: list
     }))
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Developers']));
