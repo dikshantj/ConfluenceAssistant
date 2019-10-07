@@ -19,8 +19,7 @@ const DEVELOPERS = 'Developers'
 const SPONSORS = 'Sponsors'
 const EVENTLIST = 'categoryEvents'
 const EVENTDETAIL = 'categoryEvents - detail'
-
-
+const EVENTS = 'events'
 
 const app = dialogflow({ debug: true });
 
@@ -52,7 +51,6 @@ app.intent('Exit Conversation', (conv) => {
   conv.close(`Okay, talk to you next time!`);
 });
 
-
 app.intent(CATEGORY_LIST, async conv=>{
   try {
     const response = await rp(`${base_url}category/`);
@@ -81,8 +79,6 @@ app.intent(CATEGORY_LIST, async conv=>{
   }
 });
 
-
-
 app.intent(EVENT_LIST, async (conv, params, category) => {
   try {
     const res = await rp(`${base_url}events/name/?category=${category}`);
@@ -107,7 +103,6 @@ app.intent(EVENT_LIST, async (conv, params, category) => {
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
   }
 })
-
 
 app.intent(EVENTLIST, async (conv,{categories}) => {
   try {
@@ -154,6 +149,26 @@ app.intent([EVENT_DETAIL,EVENTDETAIL], async (conv, params, event) => {
   }
 })
 
+app.intent(EVENTS, async (conv, {event}) => {
+  try {
+    const res = await rp(`${base_url}events/desc/?event=${event}`);
+    let data = JSON.parse(res).data;
+    var cord = data.coordinators.toString();
+    let description = data.description +' \n  \n**VENUE: ' + data.venue +'**'+ '\n \n**COORDINATORS: '+cord+'**';
+    conv.ask('Here are the details of ' + event);
+    conv.ask(new BasicCard({
+      text: description,
+      title: data.name,
+      display: 'CROPPED'
+    }));
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+  catch (err) {
+    conv.ask(JSON.stringify(err));
+    //conv.ask('Sorry event name is not clear. Ask anything ..... m listening to you.');
+    conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers', 'Sponsors']));
+  }
+})
 
 app.intent(DEVELOPERS, conv =>{
     conv.ask('Yet to be updated')
@@ -183,6 +198,5 @@ app.intent(SPONSORS, async conv =>{
     conv.ask(new Suggestions(['Event Categories', 'About Confluence', 'Team Confluence', 'Developers']));
   }
 })
-
 
 exports.confluence = functions.https.onRequest(app)
